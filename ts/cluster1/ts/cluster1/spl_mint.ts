@@ -1,18 +1,13 @@
-import { Keypair, PublicKey, Connection, Commitment, Transaction, sendAndConfirmTransaction } from "@solana/web3.js";
-import {
-    getAssociatedTokenAddress,
-    getAssociatedTokenAddressSync,
-    getOrCreateAssociatedTokenAccount,
-    mintTo,
-    createAssociatedTokenAccountInstruction
-} from '@solana/spl-token';
+import { Keypair, PublicKey, Connection, Commitment } from "@solana/web3.js";
+import { getOrCreateAssociatedTokenAccount, mintTo } from '@solana/spl-token';
 import wallet from "../wba-wallet.json"
 import bs58 from 'bs58';
-import { create } from "domain";
 
 
 // Import our keypair from the wallet file
-const keypair = Keypair.fromSecretKey(new Uint8Array(wallet.secretkey));
+const secretKeyString = wallet.secretkey[0];
+const secretKeyArrayBuffer = Buffer.from(bs58.decode(secretKeyString));
+const keypair = Keypair.fromSecretKey(secretKeyArrayBuffer);
 
 //Create a Solana devnet connection
 const commitment: Commitment = "confirmed";
@@ -38,22 +33,6 @@ const mint = new PublicKey("F9KDW6HbJbzCYA2jJ2hhW7aWZjKxf72CNk4bAv8kgTDG");
         // Mint to ATA
         // const mintTx = ???
         // console.log(`Your mint txid: ${mintTx}`);
-
-        let keypairAta = getAssociatedTokenAddressSync(mint, keypair.publicKey);
-
-        const transaction = new Transaction().add(
-            createAssociatedTokenAccountInstruction(
-                keypair.publicKey,
-                keypairAta,
-                keypair.publicKey,
-                mint
-            )
-        );
-        const txsignature = await sendAndConfirmTransaction(
-            connection,
-            transaction,
-            [keypair]
-        );
 
         const mintTx = await mintTo(
             connection,
